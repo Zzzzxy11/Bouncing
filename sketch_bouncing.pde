@@ -1,70 +1,65 @@
-ArrayList<Ball> balls;
+Ball b1, b2, b3;
 
 void setup() {
   size(600, 600);
   ellipseMode(RADIUS);
-  balls = new ArrayList<Ball>();
-  createNewBalls(5);  
+  createNewBalls();
 }
 
 void draw() {
   background(100);
 
-
-  for (Ball b : balls) {
-    b.move();
-    b.draw();
-  }
+  b1.update();
+  b2.update();
+  b3.update();
 }
-
 
 void mousePressed() {
-  createNewBalls(3);
+  createNewBalls();
 }
 
-
-void createNewBalls(int n) {
-  for (int i = 0; i < n; i++) {
-    balls.add(new Ball());
-  }
+void createNewBalls() {
+  b1 = new Ball(width/2, height/2, random(10, 40));
+  b2 = new Ball(width/2, height/2, random(10, 40));
+  b3 = new Ball(width/2, height/2, random(10, 40));
 }
-
 
 class Ball {
-  float x, y;  
-  float dx, dy; 
-  float r;    
-  color c;     
+  float x, y;
+  float dx, dy;
+  float r;
+  color c;
 
-  
-  Ball() {
-    this.x = width/2;
-    this.y = height/2;
-    this.dx = random(-4, 4);
-    this.dy = random(-4, 4);
-    this.r = random(10, 40);
-    this.c = color(int(random(256)), int(random(256)), int(random(256)));
+  Ball(float startX, float startY, float radius) {
+    x = startX;
+    y = startY;
+    r = radius;
+    dx = random(-4, 4);
+    dy = random(-4, 4);
+    c = color(int(random(256)), int(random(256)), int(random(256)));
   }
 
-  
+  void update() {
+    move();
+    keepInBounds();
+    draw();
+  }
+
   void move() {
     x += dx;
     y += dy;
-
-    
-    if (x<r|x> width-r) {
-      dx = -dx;
-    }
-    
-    if (y<r|y > height-r) {
-      dy = -dy;
-    }
   }
 
-  
   void draw() {
     fill(c);
     noStroke();
     circle(x, y, r);
+  }
+
+  void keepInBounds() {
+    if (x - r < 0) dx = -dx;        
+    if (x + r > width) dx = -dx;   
+    if (y - r < 0) dy = -dy;        
+    if (y + r > height) dy = -dy;  
   }
 }
