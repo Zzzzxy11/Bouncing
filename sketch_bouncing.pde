@@ -1,74 +1,73 @@
 Ball b1, b2, b3;
 
 void setup() {
-  size(1800, 900);
+  size(600, 600);
   ellipseMode(RADIUS);
-  createNewBalls();
+  b1 = new Ball(width/2, height/2);
+  b2 = new Ball(width/3, height/3);
+  b3 = new Ball(width/4*3, height/2);
 }
 
 void draw() {
-  background(100);
+  background(200);
   b1.update();
+  b1.draw();
   b2.update();
+  b2.draw();
   b3.update();
-  b1.makeEmBounce(b2);
-  b1.makeEmBounce(b3);
-  b2.makeEmBounce(b3);
+  b3.draw();
 }
 
 void mousePressed() {
-  createNewBalls();
-}
-
-void createNewBalls() {
-  b1 = new Ball(random(width), random(height), random(20, 50));
-  b2 = new Ball(random(width), random(height), random(20, 50));
-  b3 = new Ball(random(width), random(height), random(20, 50));
+  if (b1.isHit(mouseX, mouseY)) {
+    b1 = new Ball(mouseX, mouseY);
+  } else if (b2.isHit(mouseX, mouseY)) {
+    b2 = new Ball(mouseX, mouseY);
+  } else if (b3.isHit(mouseX, mouseY)) {
+    b3 = new Ball(mouseX, mouseY);
+  }
 }
 
 class Ball {
-  float x, y, dx, dy, r;
+  float x, y;
+  float dx, dy;
+  float r;
   color c;
 
-  Ball(float startX, float startY, float radius) {
-    this.x = startX;
-    this.y = startY;
-    this.r = radius;
-    this.dx = random(-3, 3);
-    this.dy = random(-3, 3);
-    this.c = color(int(random(256)), int(random(256)), int(random(256)), int(random(256)));
+  Ball() {
+    this(width/2, height/2);
+  }
+
+  Ball(float startX, float startY) {
+    x = startX;
+    y = startY;
+    r = random(15, 40);
+    dx = random(-4, 4);
+    dy = random(-4, 4);
+    c = color(int(random(256)), int(random(256)), int(random(256)));
   }
 
   void update() {
-    move();
-    keepInBounds();
-    draw();
-  }
-
-  void move() {
     x += dx;
     y += dy;
+    keepInBounds();
   }
 
   void draw() {
     fill(c);
+    noStroke();
     circle(x, y, r);
   }
 
   void keepInBounds() {
-    if (x - r < 0 || x + r > width) dx *= -1;
-    if (y - r < 0 || y + r > height) dy *= -1;
+    if (x - r < 0) dx = -dx;
+    if (x + r > width) dx = -dx;
+    if (y - r < 0) dy = -dy;
+    if (y + r > height) dy = -dy;
   }
 
-  void makeEmBounce(Ball otherBall) {
-    if (dist(x, y, otherBall.x, otherBall.y) < r + otherBall.r) {
-      float tempDx = dx;
-      dx = otherBall.dx;
-      otherBall.dx = tempDx;
-
-      float tempDy = dy;
-      dy = otherBall.dy;
-      otherBall.dy = tempDy;
-    }
+  
+  boolean isHit(float mx, float my) {
+    return dist(mx, my, x, y) <= r;
   }
 }
