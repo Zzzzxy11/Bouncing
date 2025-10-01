@@ -1,30 +1,34 @@
-Ball b1, b2, b3;
+ArrayList<Ball> balls;
+int maxBalls = 10;  
 
 void setup() {
   size(600, 600);
   ellipseMode(RADIUS);
-  b1 = new Ball(width/2, height/2);
-  b2 = new Ball(width/3, height/3);
-  b3 = new Ball(width/4*3, height/2);
+  balls = new ArrayList<Ball>();
+  for (int i = 0; i < 5; i++) {
+    balls.add(new Ball(random(width), random(height)));
+  }
 }
 
 void draw() {
   background(200);
-  b1.update();
-  b1.draw();
-  b2.update();
-  b2.draw();
-  b3.update();
-  b3.draw();
+
+  for (Ball b : balls) {
+    b.update();
+    b.draw();
+  }
+
+  for (int i = 0; i < balls.size(); i++) {
+    for (int j = i+1; j < balls.size(); j++) {
+      balls.get(i).bounce(balls.get(j));
+    }
+  }
 }
 
 void mousePressed() {
-  if (b1.isHit(mouseX, mouseY)) {
-    b1 = new Ball(mouseX, mouseY);
-  } else if (b2.isHit(mouseX, mouseY)) {
-    b2 = new Ball(mouseX, mouseY);
-  } else if (b3.isHit(mouseX, mouseY)) {
-    b3 = new Ball(mouseX, mouseY);
+  balls.add(new Ball(mouseX, mouseY));
+  if (balls.size() > maxBalls) {
+    balls.remove(0); 
   }
 }
 
@@ -33,10 +37,6 @@ class Ball {
   float dx, dy;
   float r;
   color c;
-
-  Ball() {
-    this(width/2, height/2);
-  }
 
   Ball(float startX, float startY) {
     x = startX;
@@ -50,7 +50,8 @@ class Ball {
   void update() {
     x += dx;
     y += dy;
-    keepInBounds();
+    if (x - r < 0 || x + r > width) dx = -dx;
+    if (y - r < 0 || y + r > height) dy = -dy;
   }
 
   void draw() {
@@ -59,15 +60,16 @@ class Ball {
     circle(x, y, r);
   }
 
-  void keepInBounds() {
-    if (x - r < 0) dx = -dx;
-    if (x + r > width) dx = -dx;
-    if (y - r < 0) dy = -dy;
-    if (y + r > height) dy = -dy;
-  }
+  void bounce(Ball other) {
+    float d = dist(x, y, other.x, other.y);
+    if (d < r + other.r) {
+      float tempDx = dx;
+      dx = other.dx;
+      other.dx = tempDx;
 
-  
-  boolean isHit(float mx, float my) {
-    return dist(mx, my, x, y) <= r;
+      float tempDy = dy;
+      dy = other.dy;
+      other.dy = tempDy;
+    }
   }
 }
