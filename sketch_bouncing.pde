@@ -1,5 +1,4 @@
 ArrayList<Ball> balls;
-int maxBalls = 10;  
 
 void setup() {
   size(600, 600);
@@ -13,22 +12,25 @@ void setup() {
 void draw() {
   background(200);
 
+
   for (Ball b : balls) {
     b.update();
     b.draw();
   }
 
+
   for (int i = 0; i < balls.size(); i++) {
-    for (int j = i+1; j < balls.size(); j++) {
+    for (int j = i + 1; j < balls.size(); j++) {
       balls.get(i).bounce(balls.get(j));
     }
   }
 }
 
 void mousePressed() {
-  balls.add(new Ball(mouseX, mouseY));
-  if (balls.size() > maxBalls) {
-    balls.remove(0); 
+  for (Ball b : balls) {
+    if (b.isHit(mouseX, mouseY)) {
+      b.respawn();  
+    }
   }
 }
 
@@ -50,8 +52,8 @@ class Ball {
   void update() {
     x += dx;
     y += dy;
-    if (x - r < 0 || x + r > width) dx = -dx;
-    if (y - r < 0 || y + r > height) dy = -dy;
+    if (x - r < 0 || x + r > width) dx *= -1;
+    if (y - r < 0 || y + r > height) dy *= -1;
   }
 
   void draw() {
@@ -63,13 +65,33 @@ class Ball {
   void bounce(Ball other) {
     float d = dist(x, y, other.x, other.y);
     if (d < r + other.r) {
-      float tempDx = dx;
-      dx = other.dx;
-      other.dx = tempDx;
 
+      float overlap = 0.5 * (r + other.r - d);
+      float angle = atan2(other.y - y, other.x - x);
+      x -= overlap * cos(angle);
+      y -= overlap * sin(angle);
+      other.x += overlap * cos(angle);
+      other.y += overlap * sin(angle);
+
+  
+      float tempDx = dx;
       float tempDy = dy;
+      dx = other.dx;
       dy = other.dy;
+      other.dx = tempDx;
       other.dy = tempDy;
     }
+  }
+
+  boolean isHit(float mx, float my) {
+    return dist(mx, my, x, y) <= r;
+  }
+
+  void respawn() {
+    x = random(r, width - r);
+    y = random(r, height - r);
+    dx = random(-4, 4);
+    dy = random(-4, 4);
+    c = color(int(random(256)), int(random(256)), int(random(256)));
   }
 }
